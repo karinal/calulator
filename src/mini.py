@@ -3,7 +3,6 @@ import sys
 from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtUiTools import *
-import calc
 
 class operation:
     notset=0
@@ -29,8 +28,11 @@ class mini (QWidget):
         #connect to output
         self.out=self.ui.findChild(QObject,"lcdNumber")
         self.out.setDigitCount(10)
-        self.out.connect(SIGNAL("OverflowError"),self.lcdNumber_OverflowError)
         QMetaObject.connectSlotsByName(self)
+    def sizeHint(self):
+        g=self.ui.geometry()
+        return g.size()
+
     def operant(self,i):
         if self.op==operation.notset:
             self.operant1=self.operant1*10+int(i)
@@ -39,14 +41,14 @@ class mini (QWidget):
             self.operant2=self.operant2*10+int(i)
             self.display(self.operant2)
     def display(self,d):
-        self.out.display(d)
-    def lcdNumber_OverflowError(self):
-        print "o"
-        self.op=operation.notset
-        self.result=0
-        self.operant1=0
-        self.operant2=0
-        self.out.display("E")
+        try:
+            self.out.display(d)
+        except OverflowError:
+            self.op=operation.notset
+            self.result=0
+            self.operant1=0
+            self.operant2=0
+            self.out.display("OverFlow")
     @Slot()
     def on_number_0_clicked(self):
         self.operant(0)
